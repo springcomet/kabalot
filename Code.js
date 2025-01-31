@@ -106,7 +106,20 @@ function processNewFile(file, outputFolder) {
   }
 
   // 2) Extract needed fields via regex
-  var extracted = extract(fileContent);
+  var patterns = [
+    { tag: "sum", pattern: /סה"?כ (?:(?:בשח:\s*)|(?:לתשלום:?))\s+(?<value>\d+(?:.\d+)?)/gm },
+    { tag: "num", pattern: /(?:חשבונית מס\/קבלה(?:\D|\s)*(?<value>\d+))/gm },
+    { tag: "date", pattern: /(?<value>(0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)(?:0[1-9]|1[0-2])(\/|\.)(?:([12]\d{3})|\d{2}))/gm }
+  ];
+
+  var extracted = {};
+  patterns.forEach(function(item) {
+    extracted[item.tag] = matchit(item.tag, item.pattern, fileContent);
+  });
+
+  var sum = extracted["sum"];
+  var num = extracted["num"];
+  var d = extracted["date"];
 
   // 3) Create a .txt file in the output folder
   var textFileLink = createTextFile(fileName, fileContent, outputFolder);
@@ -231,9 +244,9 @@ function appendExtractionLog(file, fileContent, extracted, textFileLink, outputF
     originalLink,
     textFileLink,
     fileContent,
-    extracted.sum,
-    extracted.num,
-    extracted.d
+    extracted["sum"],
+    extracted["num"],
+    extracted["d"]
   ];
   sheet.appendRow(rowData);
   Logger.log("Appended new row: " + JSON.stringify(rowData));
@@ -282,7 +295,7 @@ function extract(fileContent) {
   var num = matchit("num", numPattern, fileContent);
   var d   = matchit("date", datePattern, fileContent);
 
-  return { sum: sum, num: num, d: d };
+  return { sum: (sum?sum:''), num: (num?num:''), d: (d?d:'') };
 }
 
 /**

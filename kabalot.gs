@@ -29,6 +29,10 @@ function main() {
   var knownFiles = scriptProperties.getProperty('knownFileIDs');
   knownFiles = knownFiles ? JSON.parse(knownFiles) : [];
 
+  var runMode = scriptProperties.getProperty('RunMode');
+  if (runMode === 'test') {
+    Logger.log('Running in test mode');
+  }
   var newFiles = [];
   while (files.hasNext()) {
     var file = files.next();
@@ -44,10 +48,18 @@ function main() {
   // 5. Process new files, placing artifacts in the subfolder
   if (newFiles.length > 0) {
     newFiles.forEach(function(file) {
-      processNewFile(file, outputFolder);
-      knownFiles.push(file.getId());
+      try {
+        processNewFile(file, outputFolder);
+        if (runMode !== 'test') {
+          knownFiles.push(file.getId());
+        }
+      } catch (e) {
+        Logger.log("Error processing file: " + file.getName() + " (" + file.getId() + "): " + e.toString());
+      }
     });
-    scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));
+    if (runMode !== 'test') {
+      scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));
+    }
   }
 }
 

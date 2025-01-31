@@ -35,18 +35,19 @@ function main() {
     var fileId = file.getId();
     if (knownFiles.indexOf(fileId) === -1) {
       newFiles.push(file);
-      knownFiles.push(fileId);
     }
   }
 
   // 4. Update known file IDs
-  scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));
+  Logger.log('found ' + knownFiles.length + ' known and ' + newFiles.length + ' new');
 
   // 5. Process new files, placing artifacts in the subfolder
   if (newFiles.length > 0) {
     newFiles.forEach(function(file) {
       processNewFile(file, outputFolder);
+      knownFiles.push(file.getId());
     });
+    scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));
   }
 }
 
@@ -65,8 +66,12 @@ function findOrCreateSubfolder(parentFolder, subfolderName) {
     }
   }
   // Otherwise, create a new subfolder
-  var newSubFolder = parentFolder.createFolder(subfolderName);
-  Logger.log("Created subfolder: " + newSubFolder.getName() + " (" + newSubFolder.getId() + ")");
+  try {
+    var newSubFolder = parentFolder.createFolder(subfolderName);
+    Logger.log("Created subfolder: " + newSubFolder.getName() + " (" + newSubFolder.getId() + ")");
+  } catch (e) {
+    Logger.log("Error creating subfolder: " + e.toString());
+  }
   return newSubFolder;
 }
 
@@ -135,7 +140,7 @@ function getFileContent(file) {
       }
     } catch (err) {
       Logger.log("Error converting PDF to Google Doc: " + err);
-      return '';
+      throw err;
     }
   }
 

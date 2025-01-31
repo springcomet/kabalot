@@ -114,12 +114,9 @@ function processNewFile(file, outputFolder) {
 
   var extracted = {};
   patterns.forEach(function(item) {
-    extracted[item.tag] = matchit(item.tag, item.pattern, fileContent);
+    v = matchit(item.tag, item.pattern, fileContent);
+    extracted[item.tag] = v? v : "N/A";
   });
-
-  var sum = extracted["sum"];
-  var num = extracted["num"];
-  var d = extracted["date"];
 
   // 3) Create a .txt file in the output folder
   var textFileLink = createTextFile(fileName, fileContent, outputFolder);
@@ -284,21 +281,6 @@ function findOrCreateSheetInFolder(outputFolder) {
 }
 
 /**
- * Extract sum, num, and date fields from text using regex patterns.
- */
-function extract(fileContent) {
-  var sumPattern = /סה"?כ (?:(?:בשח:\s*)|(?:לתשלום:?))\s+(?<value>\d+(?:.\d+)?)/gm; 
-  var numPattern = /(?:חשבונית מס\/קבלה(?:\D|\s)*(?<value>\d+))/gm;
-  //var datePattern = /(?<value>(?:0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)?(?:0[1-9]|1[0-2])(\/|\.)?(?:([12]\d{3})|\d{2}))/gm;
-  var datePattern =     /(?<value>(0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)(?:0[1-9]|1[0-2])(\/|\.)(?:([12]\d{3})|\d{2}))/gm
-  var sum = matchit("sum", sumPattern, fileContent);
-  var num = matchit("num", numPattern, fileContent);
-  var d   = matchit("date", datePattern, fileContent);
-
-  return { sum: (sum?sum:''), num: (num?num:''), d: (d?d:'') };
-}
-
-/**
  * Return the first named group "value" from a regex match, or null if none found.
  */
 function matchit(name, pattern, content) {
@@ -306,8 +288,8 @@ function matchit(name, pattern, content) {
   if (matches && matches.groups && matches.groups.value) {
     Logger.log("Found matches for " + name + ": " + matches.groups.value);
     return matches.groups.value;
-  } else {
-    Logger.log("No match found for " + name);
-    return null;
   }
+  Logger.log("No match found for " + name);
+  return null;
+
 }

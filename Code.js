@@ -16,6 +16,11 @@ function main() {
   var countExtracted = {};
   var scriptProperties = PropertiesService.getScriptProperties();
 
+  var runMode = scriptProperties.getProperty('RunMode');
+  if (runMode === 'test') {
+    Logger.log('Running in test mode');
+  }
+ 
   // 1. Read the folder ID and subfolder name from script properties
   var inputFolderId = scriptProperties.getProperty('InputFolderId');
   if (!inputFolderId) {
@@ -37,13 +42,18 @@ function main() {
   var knownFiles = scriptProperties.getProperty('knownFileIDs');
   knownFiles = knownFiles ? JSON.parse(knownFiles) : [];
 
-  var runMode = scriptProperties.getProperty('RunMode');
-  if (runMode === 'test') {
-    Logger.log('Running in test mode');
+  var testFiles = [];
+  if (runMode === 'test' ) {
+    testFiles = scriptProperties.getProperty('TestFiles');
+    testFiles = testFiles ? JSON.parse(testFiles) : [];
   }
+ 
   var newFiles = [];
   while (files.hasNext()) {
     var file = files.next();
+    if (runMode === 'test' && testFiles.indexOf(file.getName()) === -1) {
+      continue;
+    }
     var fileId = file.getId();
     if (knownFiles.indexOf(fileId) === -1) {
       newFiles.push(file);

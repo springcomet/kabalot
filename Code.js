@@ -1,6 +1,6 @@
 var patterns = [
-  { tag: "sum", pattern: /(?:חשבונית מס[ \/]קבלה(?:\D|\s)*(?<value>[\d\/]+))/gm }, // https://regex101.com/r/LHksPq/3
-  { tag: "num", pattern: /(?:חשבונית מס\/קבלה(?:\D|\s)*(?<value>\d+))/gm },
+  { tag: "sum", pattern: /((סה"?כ )?(?:(?:בשח:\s*)|(?:לתשלום:?))\s+(?<value>\d+(?:\s?\.\s?\d+)?))/gm },
+  { tag: "num", pattern: /(?:חשבונית מס[ \/]קבלה(?:\D|\s)*(?<value>[\d\/]+))/gm }, // https://regex101.com/r/LHksPq/3
   { tag: "date", pattern: /(?<value>(0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)(?:0[1-9]|1[0-2])(\/|\.)(?:([12]\d{3})|\d{2}))/gm}
 ];
 
@@ -79,7 +79,7 @@ function main() {
     }
   });
   Logger.log("Total files processed: " + processedFiles);
-  Logger.log("Pattern counts: " + JSON.stringify(patternCounts));
+  Logger.log("Pattern counts: " + JSON.stringify(patternCount));
 
   if (runMode !== 'test') {
     scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));

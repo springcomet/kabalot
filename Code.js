@@ -278,7 +278,7 @@ function findOrCreateSheetInFolder(outputFolder) {
 
   // Optionally add a header row
   var sheet = newSS.getActiveSheet();
-  sheet.appendRow(["Original PDF link", "File Name", "Text file link", "Extracted text", "Sum", "Num", "Date"]);
+  sheet.appendRow(["File Name", "Original PDF link", "Text file link", "Extracted text", "Sum", "Num", "Date"]);
 
   Logger.log("Created new spreadsheet: " + newSS.getName() + " (" + newSS.getId() + ")");
   return newSS;

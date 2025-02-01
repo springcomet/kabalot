@@ -215,13 +215,8 @@ function getFileContent(file) {
 
   // 3) All others (e.g., .txt, .csv)
   else {
-    try {
-      var fileBlob = file.getBlob();
-      fileContent = fileBlob.getDataAsString();
-    } catch (blobErr) {
-      Logger.log("Error reading blob from " + fileName + ": " + blobErr);
-      return '';
-    }
+    Logger.log("Mime type " + mimeType + " of file " + fileName + " is not supported");
+    throw { message: "Unsupported file type"};
   }
 
   Logger.log("Extracted content from " + fileName + ": " + fileContent);

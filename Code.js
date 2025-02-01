@@ -51,7 +51,7 @@ function main() {
   var newFiles = [];
   while (files.hasNext()) {
     var file = files.next();
-    if (runMode === 'test' && testFiles.indexOf(file.getName()) === -1) {
+    if (runMode === 'test' && testFiles.length > 0 && testFiles.indexOf(file.getName()) === -1) {
       continue;
     }
     var fileId = file.getId();
@@ -66,17 +66,19 @@ function main() {
   // 5. Process new files, placing artifacts in the subfolder
   var spreadsheet = findOrCreateSheetInFolder(outputFolder);
 
+  var processedFiles = 0;
   newFiles.forEach(function(file) {
     try {
       processNewFile(file, outputFolder, spreadsheet, countExtracted);
       if (runMode !== 'test') {
         knownFiles.push(file.getId());
+        processedFiles++;
       }
     } catch (e) {
       Logger.log("Error processing file: " + file.getName() + " (" + file.getId() + "): " + e.toString());
     }
   });
-  Logger.log("Total files processed: " + n);
+  Logger.log("Total files processed: " + processedFiles);
   Logger.log("Pattern counts: " + JSON.stringify(patternCounts));
 
   if (runMode !== 'test') {

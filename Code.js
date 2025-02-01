@@ -46,20 +46,20 @@ function main() {
   Logger.log('found ' + knownFiles.length + ' known and ' + newFiles.length + ' new');
 
   // 5. Process new files, placing artifacts in the subfolder
-  if (newFiles.length > 0) {
-    newFiles.forEach(function(file) {
-      try {
-        processNewFile(file, outputFolder);
-        if (runMode !== 'test') {
-          knownFiles.push(file.getId());
-        }
-      } catch (e) {
-        Logger.log("Error processing file: " + file.getName() + " (" + file.getId() + "): " + e.toString());
+  var spreadsheet = findOrCreateSheetInFolder(outputFolder);
+
+  newFiles.forEach(function(file) {
+    try {
+      processNewFile(file, outputFolder, spreadsheet);
+      if (runMode !== 'test') {
+        knownFiles.push(file.getId());
       }
-    });
-    if (runMode !== 'test') {
-      scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));
+    } catch (e) {
+      Logger.log("Error processing file: " + file.getName() + " (" + file.getId() + "): " + e.toString());
     }
+  });
+  if (runMode !== 'test') {
+    scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));
   }
 }
 
@@ -94,7 +94,7 @@ function findOrCreateSubfolder(parentFolder, subfolderName) {
  * 3. Create .txt file in the output folder.
  * 4. Append a row to the "Extraction Log" (also in the output folder).
  */
-function processNewFile(file, outputFolder) {
+function processNewFile(file, outputFolder, spreadsheet) {
   var fileName = file.getName();
   Logger.log("New file to process: " + fileName);
 
@@ -122,7 +122,7 @@ function processNewFile(file, outputFolder) {
   var textFileLink = createTextFile(fileName, fileContent, outputFolder);
 
   // 4) Append a row to "Extraction Log" in the output folder
-  appendExtractionLog(file, fileName, fileContent, extracted, textFileLink, outputFolder);
+  appendExtractionLog(file, fileContent, extracted, textFileLink, outputFolder, spreadsheet);
 }
 
 /**
@@ -227,18 +227,16 @@ function createTextFile(fileName, fileContent, outputFolder) {
  * then append a row with the original PDF link, text file link, file content,
  * and extracted fields: sum, num, and date.
  */
-function appendExtractionLog(file, fileName, fileContent, extracted, textFileLink, outputFolder) {
+function appendExtractionLog(file, fileContent, extracted, textFileLink, outputFolder, spreadsheet) {
   var fileId = file.getId();
   var originalLink = 'https://drive.google.com/file/d/' + fileId + '/view?usp=sharing';
 
-  var spreadsheet = findOrCreateSheetInFolder(outputFolder);
   var sheet = spreadsheet.getActiveSheet();
 
   Logger.log("Writing to spreadsheet: " + spreadsheet.getName() + " (" + spreadsheet.getId() + ")");
   Logger.log("Spreadsheet link: https://docs.google.com/spreadsheets/d/" + spreadsheet.getId() + "/edit?usp=sharing");
 
   var rowData = [
-    fileName,
     originalLink,
     textFileLink,
     fileContent,

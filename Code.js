@@ -122,7 +122,7 @@ function processNewFile(file, outputFolder) {
   var textFileLink = createTextFile(fileName, fileContent, outputFolder);
 
   // 4) Append a row to "Extraction Log" in the output folder
-  appendExtractionLog(file, fileContent, extracted, textFileLink, outputFolder);
+  appendExtractionLog(file, fileName, fileContent, extracted, textFileLink, outputFolder);
 }
 
 /**
@@ -227,7 +227,7 @@ function createTextFile(fileName, fileContent, outputFolder) {
  * then append a row with the original PDF link, text file link, file content,
  * and extracted fields: sum, num, and date.
  */
-function appendExtractionLog(file, fileContent, extracted, textFileLink, outputFolder) {
+function appendExtractionLog(file, fileName, fileContent, extracted, textFileLink, outputFolder) {
   var fileId = file.getId();
   var originalLink = 'https://drive.google.com/file/d/' + fileId + '/view?usp=sharing';
 
@@ -238,6 +238,7 @@ function appendExtractionLog(file, fileContent, extracted, textFileLink, outputF
   Logger.log("Spreadsheet link: https://docs.google.com/spreadsheets/d/" + spreadsheet.getId() + "/edit?usp=sharing");
 
   var rowData = [
+    fileName,
     originalLink,
     textFileLink,
     fileContent,
@@ -274,7 +275,7 @@ function findOrCreateSheetInFolder(outputFolder) {
 
   // Optionally add a header row
   var sheet = newSS.getActiveSheet();
-  sheet.appendRow(["Original PDF link", "Text file link", "Extracted text", "Sum", "Num", "Date"]);
+  sheet.appendRow(["Original PDF link", "File Name", "Text file link", "Extracted text", "Sum", "Num", "Date"]);
 
   Logger.log("Created new spreadsheet: " + newSS.getName() + " (" + newSS.getId() + ")");
   return newSS;

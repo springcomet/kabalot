@@ -71,15 +71,15 @@ function main() {
   newFiles.forEach(function(file) {
     try {
       processNewFile(file, outputFolder, spreadsheet, countExtracted);
-      if (runMode !== 'test') {
+      processedFiles++;
+      if (runMode !== 'test') {processedFiles
         knownFiles.push(file.getId());
-        processedFiles++;
       }
     } catch (e) {
       Logger.log("Error processing file: " + file.getName() + " (" + file.getId() + "): " + e.toString());
     }
   });
-  Logger.log("Total files processed: " + processedFiles);
+  Logger.log("Total files processed: " + );
   Logger.log("Pattern counts: " + JSON.stringify(countExtracted));
 
   if (runMode !== 'test') {

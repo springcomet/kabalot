@@ -79,7 +79,7 @@ function main() {
     }
   });
   Logger.log("Total files processed: " + processedFiles);
-  Logger.log("Pattern counts: " + JSON.stringify(patternCount));
+  Logger.log("Pattern counts: " + JSON.stringify(countExtracted));
 
   if (runMode !== 'test') {
     scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));

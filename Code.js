@@ -243,7 +243,7 @@ function appendExtractionLog(file, fileContent, extracted, textFileLink, outputF
     fileContent,
     extracted["sum"],
     extracted["num"],
-    extracted["d"]
+    extracted["date"]
   ];
   try {
     sheet.appendRow(rowData);

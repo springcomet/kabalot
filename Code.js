@@ -46,6 +46,7 @@ function main() {
   if (runMode === 'test' ) {
     testFiles = scriptProperties.getProperty('TestFiles');
     testFiles = testFiles ? JSON.parse(testFiles) : [];
+    Logger.log("Test files: " + JSON.stringify(testFiles));
   }
  
   var newFiles = [];
@@ -216,7 +217,7 @@ function getFileContent(file) {
   // 3) All others (e.g., .txt, .csv)
   else {
     Logger.log("Mime type " + mimeType + " of file " + fileName + " is not supported");
-    throw { message: "Unsupported file type"};
+    throw new Error("Unsupported file type: " + mimeType + " for file: " + fileName);
   }
 
   Logger.log("Extracted content from " + fileName + ": " + fileContent);

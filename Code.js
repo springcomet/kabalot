@@ -1,3 +1,10 @@
+var patterns = [
+  { tag: "sum", pattern: /סה"?כ (?:(?:בשח:\s*)|(?:לתשלום:?))\s+(?<value>\d+(?:.\d+)?)/gm },
+  { tag: "num", pattern: /(?:חשבונית מס\/קבלה(?:\D|\s)*(?<value>\d+))/gm },
+  { tag: "date", pattern: /(?<value>(0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)(?:0[1-9]|1[0-2])(\/|\.)(?:([12]\d{3})|\d{2}))/gm}
+];
+
+
 /**
  * Main function:
  * 1. Reads "InputFolderId" and "OutputFolderName" from Script Properties.
@@ -6,6 +13,7 @@
  *    artifacts in the subfolder.
  */
 function main() {
+  var countExtracted = {};
   var scriptProperties = PropertiesService.getScriptProperties();
 
   // 1. Read the folder ID and subfolder name from script properties
@@ -50,7 +58,7 @@ function main() {
 
   newFiles.forEach(function(file) {
     try {
-      processNewFile(file, outputFolder, spreadsheet);
+      processNewFile(file, outputFolder, spreadsheet, countExtracted);
       if (runMode !== 'test') {
         knownFiles.push(file.getId());
       }
@@ -58,6 +66,9 @@ function main() {
       Logger.log("Error processing file: " + file.getName() + " (" + file.getId() + "): " + e.toString());
     }
   });
+  Logger.log("Total files processed: " + newFiles.length);
+  Logger.log("Pattern counts: " + JSON.stringify(patternCounts));
+
   if (runMode !== 'test') {
     scriptProperties.setProperty('knownFileIDs', JSON.stringify(knownFiles));
   }
@@ -94,7 +105,7 @@ function findOrCreateSubfolder(parentFolder, subfolderName) {
  * 3. Create .txt file in the output folder.
  * 4. Append a row to the "Extraction Log" (also in the output folder).
  */
-function processNewFile(file, outputFolder, spreadsheet) {
+function processNewFile(file, outputFolder, spreadsheet, countExtracted) {
   var fileName = file.getName();
   Logger.log("New file to process: " + fileName);
 
@@ -106,16 +117,16 @@ function processNewFile(file, outputFolder, spreadsheet) {
   }
 
   // 2) Extract needed fields via regex
-  var patterns = [
-    { tag: "sum", pattern: /סה"?כ (?:(?:בשח:\s*)|(?:לתשלום:?))\s+(?<value>\d+(?:.\d+)?)/gm },
-    { tag: "num", pattern: /(?:חשבונית מס\/קבלה(?:\D|\s)*(?<value>\d+))/gm },
-    { tag: "date", pattern: /(?<value>(0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)(?:0[1-9]|1[0-2])(\/|\.)(?:([12]\d{3})|\d{2}))/gm}
-  ];
-
+ 
   var extracted = {};
   patterns.forEach(function(item) {
     v = matchit(item.tag, item.pattern, fileContent);
-    extracted[item.tag] = v? v : "N/A";
+    if (v) {
+      extracted[item.tag] = v;
+      countExtracted[item.tag] = countExtracted[item.tag] + 1;
+    } else {
+      extracted[item.tag] = "N/A";
+    }
   });
 
   // 3) Create a .txt file in the output folder

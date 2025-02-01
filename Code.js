@@ -237,6 +237,7 @@ function appendExtractionLog(file, fileContent, extracted, textFileLink, outputF
   Logger.log("Spreadsheet link: https://docs.google.com/spreadsheets/d/" + spreadsheet.getId() + "/edit?usp=sharing");
 
   var rowData = [
+    file.getName(),
     originalLink,
     textFileLink,
     fileContent,
@@ -244,8 +245,12 @@ function appendExtractionLog(file, fileContent, extracted, textFileLink, outputF
     extracted["num"],
     extracted["d"]
   ];
-  sheet.appendRow(rowData);
-  Logger.log("Appended new row: " + JSON.stringify(rowData));
+  try {
+    sheet.appendRow(rowData);
+    Logger.log("Appended new row: " + JSON.stringify(rowData));
+  } catch (e) {
+    Logger.log("Error appending row: " + e.toString());
+  }
 }
 
 /**

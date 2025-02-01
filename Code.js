@@ -136,7 +136,11 @@ function processNewFile(file, outputFolder, spreadsheet, countExtracted) {
     v = matchit(item.tag, item.pattern, fileContent);
     if (v) {
       extracted[item.tag] = v;
-      countExtracted[item.tag] = countExtracted[item.tag] + 1;
+      if (countExtracted[item.tag]) {
+        countExtracted[item.tag]++;
+      } else {
+        countExtracted[item.tag] = 1;
+      }
     } else {
       extracted[item.tag] = "N/A";
     }

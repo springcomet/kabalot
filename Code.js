@@ -312,6 +312,7 @@ function findOrCreateSheetInFolder(outputFolder) {
  */
 function matchit(name, pattern, content) {
   var matches = pattern.exec(content);
+  pattern.lastIndex = 0;
   if (matches && matches.groups && matches.groups.value) {
     Logger.log("Found matches for " + name + ": " + matches.groups.value);
     return matches.groups.value;

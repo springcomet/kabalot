@@ -1,7 +1,7 @@
 var patterns = [
-  { tag: "sum", pattern: /((סה"?כ )?(?:(?:בשח:\s*)|(?:לתשלום:?))\s+(?<value>\d+(?:\s?\.\s?\d+)?))/gm },
-  { tag: "num", pattern: /(?:חשבונית מס[ \/]קבלה(?:\D|\s)*(?<value>[\d\/]+))/gm }, // https://regex101.com/r/LHksPq/3
-  { tag: "date", pattern: /(?<value>(0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)(?:0[1-9]|1[0-2])(\/|\.)(?:([12]\d{3})|\d{2}))/gm}
+  { tag: "sum", pattern: [/((סה"?כ )?(?:(?:בשח:\s*)|(?:לתשלום:?))\s+(?<value>\d+(?:\s?\.\s?\d+)?))/gm] },
+  { tag: "num", pattern: [/(?:חשבונית מס[ \/]קבלה(?:\D|\s)*(?<value>[\d\/]+))/gm] },
+  { tag: "date", pattern: [/(?<value>(0[1-9]|1\d|2[0-8]|29(?=(\/|\.)\d\d(\/|\.)(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!(\/|\.)02)|31(?=(\/|\.)0[13578]|(\/|\.)1[02]))(\/|\.)(?:0[1-9]|1[0-2])(\/|\.)(?:([12]\d{3})|\d{2}))/gm] }
 ];
 
 
@@ -133,18 +133,24 @@ function processNewFile(file, outputFolder, spreadsheet, countExtracted) {
  
   var extracted = {};
   patterns.forEach(function(item) {
-    v = matchit(item.tag, item.pattern, fileContent);
-    if (v) {
-      extracted[item.tag] = v;
-      if (countExtracted[item.tag]) {
-        countExtracted[item.tag]++;
+    for (var i = 0; i < item.pattern.length; i++) {
+      var pattern = item.pattern[i];
+      var matches = matchit(item.tag, pattern, fileContent);
+      if (matches) {
+        extracted[item.tag] = matches;
+        if (countExtracted[item.tag]) {
+          countExtracted[item.tag]++;
+        } else {
+          countExtracted[item.tag] = 1;
+        }
+        break; // Break the loop if a match is found
       } else {
-        countExtracted[item.tag] = 1;
+        extracted[item.tag] = "N/A";
       }
-    } else {
-      extracted[item.tag] = "N/A";
     }
   });
+
+  Logger.log("Extracted data: " + JSON.stringify(extracted));
 
   // 3) Create a .txt file in the output folder
   var textFileLink = createTextFile(fileName, fileContent, outputFolder);
